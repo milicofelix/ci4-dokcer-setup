@@ -1,0 +1,41 @@
+version: "3.9"
+services:
+  web:
+    image: php:7.4-fpm
+    container_name: setup-ci4
+    build: 
+      context: .
+      dockerfile: ./Dockerfile
+    networks:
+      - ci4_network
+    volumes:
+      - ./applications:/var/www
+      - ./docker/nginx/sites:/etc/nginx/sites-available
+    ports:
+      - "80:80" #http
+      - "443:443" #https
+      - "8080:8080"
+      - "8081:8081"
+      - "8082:8082"
+      - "8083:8083"
+    depends_on:
+      - mysql
+
+  # aplicação MySQL
+  mysql:
+    image: mysql:8.0.29-debian
+    container_name: setup-mysql-ci4
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    volumes:
+      - ./docker/mysql/.mysql_data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: food-delivery
+    networks:
+      - ci4_network
+    ports:
+      - 3306:3306
+networks:
+  ci4_network:
+    driver: bridge  
